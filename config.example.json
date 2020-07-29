@@ -1,0 +1,8 @@
+{
+    "DiscordAccessKey": "",
+    "DiscordSecretKey": "",
+    "DiscordRedirectUrl": "example.com/",
+    "DiscordScopes": [
+        "identify"
+    ]
+}
