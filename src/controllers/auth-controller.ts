@@ -11,8 +11,14 @@ export class AuthController implements IController {
         this.discordService = discordService;
     }
 
-    getAuthDiscordAsync = (req, res) => {
-        return res.json({});
+    getAuthDiscordAsync = async (req, res) => {
+        let response = await this.discordService.authorize(req.query.code);
+        let user = await this.discordService.getCurrentUser(response.access_token);         
+
+        return res.json({
+            response: response,
+            user: user,
+        });
     }
 
     getRouter = (): Router => {
