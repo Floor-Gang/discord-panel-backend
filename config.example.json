@@ -3,6 +3,7 @@
     "DiscordAccessKey": "",
     "DiscordSecretKey": "",
     "DiscordRedirectUrl": "example.com/",
+    "DiscordGuildID": "",
     "DiscordScopes": [
         "identify"
     ]
