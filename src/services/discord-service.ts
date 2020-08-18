@@ -47,7 +47,7 @@ export class DiscordService {
       url: 'https://discord.com/api/v6/oauth2/token',
     })
     .catch((err) => {
-      return err.data;
+      return err.response;
     });
 
     return response.data;
@@ -65,7 +65,7 @@ export class DiscordService {
 
   getParsedInfo = async (code) => {
     let userData = await this.getCurrentUser(code);
-    
+
     if (userData.status != null && userData.status != 200) {
       // Probably 401 - unauthorized. AKA Invalid auth code.
       return userData.data;
@@ -79,7 +79,7 @@ export class DiscordService {
       ID: userData.id,
       Email: userData.email,
       AvatarHash: userData.avatar,
-      ProfileURL: memberInfo.user.avatarURL,
+      ProfileURL: memberInfo.user.avatarURL(),
       Username: `${userData.username}#${memberInfo.user.discriminator}`,
       Roles: userRoles,
     }
@@ -114,5 +114,13 @@ export class DiscordService {
     });
 
     return response.data;
+  }
+
+  getServerRules = () => {
+    return this.config.Rules
+  }
+
+  sendChannelMessage = (channelID, message) => {
+    const channel: discordjs.Channel = this.client.guilds.cache.get('720922703648915456').channels.cache.get(channelID)
   }
 }

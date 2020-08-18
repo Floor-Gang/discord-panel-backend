@@ -5,6 +5,8 @@ type Config = {
   DiscordRedirectUrl: string;
   DiscordGuildID: string;
   DiscordScopes: string[];
+  Database: object;
+  Rules: any
 }
 
 type Member = {

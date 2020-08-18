@@ -3,9 +3,11 @@ import "reflect-metadata";
 import * as express from "express";
 import { ConfigService } from "./services/config-service";
 import { AuthController } from "./controllers/auth-controller";
+import { ModmailController } from "./controllers/modmail-controller";
 import { container } from "tsyringe";
 import { IController } from "./types/controllers";
 import * as bodyParser from "body-parser";
+import * as discordjs from 'discord.js';
 
 // Entry point for the app.
 const mainAsync = async () => {
@@ -23,17 +25,20 @@ const mainAsync = async () => {
   app.use(bodyParser.urlencoded({ extended: false }));
 
   app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
     console.log(`${req.method} - ${req.url}\n`)
     next();
   })
 
   app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Method", "*");
     next();
   })
 
   app.use("/auth", container.resolve<IController>(AuthController).getRouter())
+
+  app.use("/modmail", container.resolve<IController>(ModmailController).getRouter())
 
   app.listen(8080, () => {
     console.log("Starting the bot...");

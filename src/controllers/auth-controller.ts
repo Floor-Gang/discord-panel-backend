@@ -38,6 +38,18 @@ export class AuthController implements IController {
     return res.json(memberInfo)
   }
 
+  getRuleSettings = async (req, res) => {
+    return res.json(await this.discordService.getServerRules())
+  }
+
+  setRuleSettings = async (req, res) => {
+    console.log(req.body)
+
+    this.discordService.sendChannelMessage('744950245317935195', req.body);
+
+    return res.json({success: true})
+  }
+
   getRouter = (): Router => {
     const router = Router();
 
@@ -45,6 +57,10 @@ export class AuthController implements IController {
     router.get("/init-discord", this.getInitAuthDiscordAsync);
     // Re-authorize existing token.
     router.get("/discord", this.getAuthDiscordAsync);
+
+    // Nothing to do with auth just uhm 
+    router.get("/rule-manager/get", this.getRuleSettings)
+    router.post("/rule-manager/set", this.setRuleSettings)
   
     return router;
   }
