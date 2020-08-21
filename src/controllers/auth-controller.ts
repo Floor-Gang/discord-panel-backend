@@ -1,8 +1,8 @@
-import { IController } from "../types/controllers";
-import { Router } from "express";
-import { DiscordService } from "../services/discord-service";
-import { autoInjectable } from "tsyringe";
-import { GuildMember } from "discord.js";
+import { IController } from '../types/controllers';
+import { Router } from 'express';
+import { DiscordService } from '../services/discord-service';
+import { autoInjectable } from 'tsyringe';
+import { GuildMember } from 'discord.js';
 
 @autoInjectable()
 export class AuthController implements IController {
@@ -38,29 +38,13 @@ export class AuthController implements IController {
     return res.json(memberInfo)
   }
 
-  getRuleSettings = async (req, res) => {
-    return res.json(await this.discordService.getServerRules())
-  }
-
-  setRuleSettings = async (req, res) => {
-    console.log(req.body)
-
-    this.discordService.sendChannelMessage('744950245317935195', req.body);
-
-    return res.json({success: true})
-  }
-
   getRouter = (): Router => {
     const router = Router();
 
     // Initial authentication
-    router.get("/init-discord", this.getInitAuthDiscordAsync);
+    router.get('/init-discord', this.getInitAuthDiscordAsync);
     // Re-authorize existing token.
-    router.get("/discord", this.getAuthDiscordAsync);
-
-    // Nothing to do with auth just uhm 
-    router.get("/rule-manager/get", this.getRuleSettings)
-    router.post("/rule-manager/set", this.setRuleSettings)
+    router.get('/discord', this.getAuthDiscordAsync);
   
     return router;
   }

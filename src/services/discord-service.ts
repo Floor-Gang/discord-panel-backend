@@ -1,13 +1,11 @@
 import {autoInjectable, inject} from "tsyringe";
 import axios from "axios";
 import * as qs from "qs";
-import { response } from "express";
 import * as discordjs from 'discord.js';
 
 @autoInjectable()
 export class DiscordService {
   config: Config;
-  client: discordjs.Client
 
   oauthAccessToken: string;
   oauthSecretToken: string;
@@ -21,13 +19,6 @@ export class DiscordService {
     this.oauthSecretToken = config.DiscordSecretKey;
     this.oauthRedirectUrl = config.DiscordRedirectUrl;
     this.oauthScopes = config.DiscordScopes;
-
-    this.client = new discordjs.Client();
-    this.client.login(config.DiscordToken);
-
-    this.client.on('ready', () => {
-      console.log('Started! Backend running')
-    })
   }
 
   initAuthorize = async (code) => {  
@@ -103,7 +94,7 @@ export class DiscordService {
   };
 
   getMember = (memberID) => {
-    return this.client.guilds.cache.get(this.config.DiscordGuildID).members.cache.get(memberID)
+    return global.DiscordBot.guilds.cache.get(this.config.DiscordGuildID).members.cache.get(memberID)
   }
 
   _createDiscordRequest = async (accessKey, path) => {
@@ -114,13 +105,5 @@ export class DiscordService {
     });
 
     return response.data;
-  }
-
-  getServerRules = () => {
-    return this.config.Rules
-  }
-
-  sendChannelMessage = (channelID, message) => {
-    const channel: discordjs.Channel = this.client.guilds.cache.get('720922703648915456').channels.cache.get(channelID)
   }
 }

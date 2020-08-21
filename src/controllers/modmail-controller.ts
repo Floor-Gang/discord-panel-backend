@@ -1,30 +1,25 @@
-import { IController } from "../types/controllers";
-import { Router } from "express";
-import { PostgresService } from "../services/postgres-service";
-import { autoInjectable } from "tsyringe";
-import { GuildMember } from "discord.js";
+import { IController } from '../types/controllers';
+import { Router } from 'express';
+import { ModmailService } from '../services/modmail-service';
+import { autoInjectable } from 'tsyringe';
 
 @autoInjectable()
 export class ModmailController implements IController {
-  postgresService: PostgresService;
+  ModmailService: ModmailService;
 
-  constructor(postgresService: PostgresService) {
-    this.postgresService = postgresService;
+  constructor(ModmailService: ModmailService) {
+    this.ModmailService = ModmailService;
   }
 
   testFunction = async (req, res) => {
-    return res.json({
-      success: true,
-    })
+    return res.json(this.ModmailService.getModmails())
   }
 
   getRouter = (): Router => {
     const router = Router();
 
-    // Initial authentication
-    router.get("/notes", this.testFunction);
-    // Re-authorize existing token.
-    router.get("/discord", this.testFunction);
+    // Get all modmails
+    router.get('/get/all', this.testFunction);
   
     return router;
   }

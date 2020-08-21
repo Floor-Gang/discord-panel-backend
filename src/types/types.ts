@@ -6,7 +6,10 @@ type Config = {
   DiscordGuildID: string;
   DiscordScopes: string[];
   Database: object;
-  Rules: any
+  Rules: {
+    tableName: string;
+    categoryID: string;
+  }
 }
 
 type Member = {
@@ -23,4 +26,9 @@ type Role = {
   ID: string;
   Name: string;
   Color: string;
+}
+
+type postRules = {
+  rules: object[];
+  channel: string;
 }
