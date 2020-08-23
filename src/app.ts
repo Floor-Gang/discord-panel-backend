@@ -84,7 +84,7 @@ const mainAsync = async () => {
   app.use('/modmail', container.resolve<IController>(ModmailController).getRouter())
   app.use('/rule-manager', container.resolve<IController>(RuleManagerController).getRouter())
 
-  app.listen(8080, () => {
+  app.listen(config.ExpressPort, () => {
     console.log('Starting the bot...');
   });
 

@@ -1,4 +1,5 @@
 {
+    "ExpressPort": 8080,
     "DiscordToken": "",
     "DiscordAccessKey": "",
     "DiscordSecretKey": "",

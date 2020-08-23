@@ -1,4 +1,5 @@
 type Config = {
+  ExpressPort: number,
   DiscordToken: string;
   DiscordAccessKey: string;
   DiscordSecretKey: string;
