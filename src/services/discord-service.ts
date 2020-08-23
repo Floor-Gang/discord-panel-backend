@@ -47,22 +47,33 @@ export class DiscordService {
   getCurrentUser = async (accessKey) => {
     return await this._createDiscordRequest(accessKey, `/users/@me`)
     .then((data) => {
-      return data;
+      return {
+        error: false,
+        user: data,
+      };
     })
     .catch((err) => {
-      return err.response
+      console.log(`discord-service - GetCurrentUser ${err.response}`);
+  
+      return {
+        error: true,
+        user: {},
+      }
     });
   };
 
   authenticateCurrentUser = async (accessKey: string, checkRoles: string[]) => {
     return await this.getCurrentUser(accessKey)
     .then(async(data) => {
-      return await this.getGuildRoles(data.id)
+      if (data.error) {
+        return false;
+      }
+
+      return await this.getGuildRoles(data.user.id)
       .then((userRoles) => {
         return userRoles.some((role) => checkRoles.includes(role.ID))
       })
       .catch((err) => {
-        console.log(err);
         return false;
       })
     })
@@ -71,21 +82,21 @@ export class DiscordService {
   getParsedInfo = async (code) => {
     let userData = await this.getCurrentUser(code);
 
-    if (userData.status != null && userData.status != 200) {
+    if (userData.error) {
       // Probably 401 - unauthorized. AKA Invalid auth code.
-      return userData.data;
+      return "Error while authenticating user.";
     }
 
-    let memberInfo: discordjs.GuildMember = this.getMember(userData.id);
-    let userRoles = await this.getGuildRoles(userData.id);
+    let memberInfo: discordjs.GuildMember = this.getMember(userData.user.id);
+    let userRoles = await this.getGuildRoles(userData.user.id);
 
     return {
       AccessToken: code,
-      ID: userData.id,
-      Email: userData.email,
-      AvatarHash: userData.avatar,
-      ProfileURL: memberInfo.user.avatarURL(),
-      Username: `${userData.username}#${memberInfo.user.discriminator}`,
+      ID: userData.user.id,
+      Email: userData.user.email,
+      AvatarHash: userData.user.avatar,
+      ProfileURL: userData.user.user.avatarURL(),
+      Username: `${userData.user.username}#${memberInfo.user.discriminator}`,
       Roles: userRoles,
     }
   }
