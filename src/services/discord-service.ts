@@ -97,6 +97,8 @@ export class DiscordService {
     let userRoles = await this.getGuildRoles(userData.user.id);
 
     if (!userRoles.some((role) => (this.config.Permissions.defaultRole).includes(role.ID))) {
+      console.log(`${userData.user.username}#${memberInfo.user.discriminator} Attempted to access the panel.`);
+
       return {
         error: {
           error: true,
