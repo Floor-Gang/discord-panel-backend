@@ -37,6 +37,7 @@ const mainAsync = async () => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
+    // Intended log for live debugging.
     console.log(`${req.method} - ${req.url}\n`)
     next();
   })
