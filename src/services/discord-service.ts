@@ -84,20 +84,32 @@ export class DiscordService {
 
     if (userData.error) {
       // Probably 401 - unauthorized. AKA Invalid auth code.
-      return "Error while authenticating user.";
+      return {
+        error: {
+          error: true,
+          message: 'Error while authenticating user.'
+        },
+        user: {}
+      };
     }
 
     let memberInfo: discordjs.GuildMember = this.getMember(userData.user.id);
     let userRoles = await this.getGuildRoles(userData.user.id);
 
     return {
-      AccessToken: code,
-      ID: userData.user.id,
-      Email: userData.user.email,
-      AvatarHash: userData.user.avatar,
-      ProfileURL: userData.user.user.avatarURL(),
-      Username: `${userData.user.username}#${memberInfo.user.discriminator}`,
-      Roles: userRoles,
+      error: {
+        error: false,
+        message: ''
+      },
+      user: {
+        AccessToken: code,
+        ID: userData.user.id,
+        Email: userData.user.email,
+        AvatarHash: userData.user.avatar,
+        ProfileURL: userData.user.user.avatarURL(),
+        Username: `${userData.user.username}#${memberInfo.user.discriminator}`,
+        Roles: userRoles,
+      }
     }
   }
 

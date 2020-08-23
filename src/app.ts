@@ -64,7 +64,13 @@ const mainAsync = async () => {
   app.use(async (req: any, res, next) => {
     if (!(req.url).startsWith('/auth/')) {
       // This is pretty pog. Get user data anywhere by doing req.user
-      req.user = await global.getUserInfo(req.header('Authorization'));
+      const userData = await global.getUserInfo(req.header('Authorization'));
+
+      if (userData.error.error) {
+        return error(res);
+      }
+
+      req.user = userData.user;
     }
 
     next();

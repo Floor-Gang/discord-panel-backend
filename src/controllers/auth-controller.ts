@@ -23,8 +23,10 @@ export class AuthController implements IController {
     const memberInfo = await this.discordService.getParsedInfo(response.access_token)
 
     // If authcode is invalid for some reason, give status code 401
-    if (memberInfo.code != null && memberInfo.code === 0) res.status(401)
-
+    if (memberInfo.error.error) {
+      res.status(401)
+      res.json(memberInfo.error)
+    }
     return res.json(memberInfo)
   }
 
@@ -32,7 +34,10 @@ export class AuthController implements IController {
     const memberInfo = await this.discordService.getParsedInfo(req.query.code)
 
     // If authcode is invalid for some reason, give status code 401
-    if (memberInfo.code != null && memberInfo.code === 0) res.status(401)
+    if (memberInfo.error.error) {
+      res.status(401)
+      res.json(memberInfo.error)
+    }
 
     return res.json(memberInfo)
   }
