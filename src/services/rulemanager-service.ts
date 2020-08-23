@@ -25,16 +25,38 @@ export class RuleManagerService {
       })
   }
 
-  setServerRules = async (newRules, ChannelID) => {
+  logRuleChange = async (newRules, userID) => {
+    return await this.postgres
+    .query(`INSERT INTO ${this.config.Rules.tableName} (user_id, rules) VALUES ($1, $2)`, [userID, JSON.stringify(newRules)])
+    .then(() => {
+      return true;
+    })
+    .catch((err) => {
+      console.log(err);
+      return false;
+    })
+  }
+
+  setServerRules = async (newRules, ChannelID, userID) => {
     const actChannel = global.DiscordBot.channels.cache.get(ChannelID) as discordjs.TextChannel;
     return await actChannel.bulkDelete(100)
-    .then(() => {
+    .then(async () => {
       newRules.forEach(embed => {
         this.sendChannelMessage(ChannelID, { embed: embed })
       });
 
-      return {
-        success: true
+      // Log changes in the db.
+      const logRules = await this.logRuleChange(newRules, userID);
+
+      if (logRules) {
+        return {
+          success: true
+        }
+      } else {
+        return {
+          success: false
+
+        }
       }
     })
     .catch(async (err: discordjs.DiscordAPIError) => {
@@ -74,7 +96,7 @@ export class RuleManagerService {
     if (obj.parentID == this.config.Rules.categoryID) {
       return {
         id: obj.id,
-        name: obj.name,
+        name: `#${obj.name}`,
       };
     }
    })

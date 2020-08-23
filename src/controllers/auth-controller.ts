@@ -41,6 +41,9 @@ export class AuthController implements IController {
   getRouter = (): Router => {
     const router = Router();
 
+    global.authenticateUser = this.discordService.authenticateCurrentUser;
+    global.getUserInfo = this.discordService.getParsedInfo;
+
     // Initial authentication
     router.get('/init-discord', this.getInitAuthDiscordAsync);
     // Re-authorize existing token.

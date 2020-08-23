@@ -10,6 +10,10 @@ type Config = {
     tableName: string;
     categoryID: string;
   }
+  Permissions: {
+    defaultRole: string[];
+    ruleManager: string[];
+  }
 }
 
 type Member = {

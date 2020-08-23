@@ -17,7 +17,7 @@ export class RuleManagerController implements IController {
 
   setRuleSettings = async (req, res) => {
     const data: postRules = req.body;
-    const response: { success: boolean } =  await this.RuleManagerService.setServerRules(data.rules, data.channel)
+    const response: { success: boolean } =  await this.RuleManagerService.setServerRules(data.rules, data.channel, req.user.ID)
 
     if (response.success) {
       return res.json(response)

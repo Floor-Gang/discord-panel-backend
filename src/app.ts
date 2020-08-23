@@ -6,6 +6,7 @@ import { container } from 'tsyringe';
 import { IController } from './types/controllers';
 import * as bodyParser from 'body-parser';
 import * as discordjs from 'discord.js';
+import * as cors from 'cors';
 
 // Controllers
 import { AuthController } from './controllers/auth-controller';
@@ -29,19 +30,55 @@ const mainAsync = async () => {
   global.DiscordBot.login(config.DiscordToken);
   
   app.use(bodyParser.json());
+  app.use(cors())
   app.use(bodyParser.urlencoded({ extended: false }));
 
   app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
     console.log(`${req.method} - ${req.url}\n`)
     next();
   })
 
-  app.use((req, res, next) => {
+  app.use(async (req, res, next) => {
+    if (!(req.url).startsWith('/auth/')) {
+      const authCode = req.header('Authorization');
+
+      // Make sure header is even set.
+      if (authCode !== undefined) {
+        // Does this person even have default perms?
+        if (await global.authenticateUser(authCode, config.Permissions.defaultRole)) {
+          next();
+        } else {
+          error(res);
+        }
+      } else {
+        error(res);
+      }
+    } else {
+      // URL Starts with /auth/ AKA is authorizing / logging in.
+      next();
+    }
+  })
+
+  app.use(async (req: any, res, next) => {
+    if (!(req.url).startsWith('/auth/')) {
+      // This is pretty pog. Get user data anywhere by doing req.user
+      req.user = await global.getUserInfo(req.header('Authorization'));
+    }
+
     next();
   })
+
+  // If authentication fails ^
+  const error = (res) => {
+    res.status(401)
+    return res.json({
+      status: 401,
+      message: 'Unauthorized'
+    });
+  }
 
   // Attach controllers
   app.use('/auth', container.resolve<IController>(AuthController).getRouter())

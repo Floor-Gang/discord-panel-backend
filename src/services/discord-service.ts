@@ -54,6 +54,20 @@ export class DiscordService {
     });
   };
 
+  authenticateCurrentUser = async (accessKey: string, checkRoles: string[]) => {
+    return await this.getCurrentUser(accessKey)
+    .then(async(data) => {
+      return await this.getGuildRoles(data.id)
+      .then((userRoles) => {
+        return userRoles.some((role) => checkRoles.includes(role.ID))
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      })
+    })
+  };
+
   getParsedInfo = async (code) => {
     let userData = await this.getCurrentUser(code);
 
