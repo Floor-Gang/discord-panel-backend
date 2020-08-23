@@ -106,7 +106,7 @@ export class DiscordService {
         ID: userData.user.id,
         Email: userData.user.email,
         AvatarHash: userData.user.avatar,
-        ProfileURL: userData.user.user.avatarURL(),
+        ProfileURL: memberInfo.user.avatarURL(),
         Username: `${userData.user.username}#${memberInfo.user.discriminator}`,
         Roles: userRoles,
       }

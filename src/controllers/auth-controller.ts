@@ -27,7 +27,8 @@ export class AuthController implements IController {
       res.status(401)
       res.json(memberInfo.error)
     }
-    return res.json(memberInfo)
+
+    return res.json(memberInfo.user)
   }
 
   getAuthDiscordAsync = async (req, res) => {
@@ -39,7 +40,7 @@ export class AuthController implements IController {
       res.json(memberInfo.error)
     }
 
-    return res.json(memberInfo)
+    return res.json(memberInfo.user)
   }
 
   getRouter = (): Router => {
