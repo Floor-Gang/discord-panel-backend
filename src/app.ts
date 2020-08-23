@@ -42,24 +42,22 @@ const mainAsync = async () => {
   })
 
   app.use(async (req, res, next) => {
-    if (!(req.url).startsWith('/auth/')) {
-      const authCode = req.header('Authorization');
-
-      // Make sure header is even set.
-      if (authCode !== undefined) {
-        // Does this person even have default perms?
-        if (await global.authenticateUser(authCode, config.Permissions.defaultRole)) {
-          next();
-        } else {
-          error(res);
-        }
-      } else {
-        error(res);
-      }
-    } else {
+    if(req.url.startsWith('/auth/')) { 
       // URL Starts with /auth/ AKA is authorizing / logging in.
-      next();
+      return next();
     }
+   
+    const authCode = req.header('Authorization');
+  
+    if(!authCode) {
+      return error(res);
+    }
+
+    if (await global.authenticateUser(authCode, config.Permissions.defaultRole)) {
+      return next();
+    }
+
+    return error(res);
   })
 
   app.use(async (req: any, res, next) => {
