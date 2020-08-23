@@ -96,6 +96,16 @@ export class DiscordService {
     let memberInfo: discordjs.GuildMember = this.getMember(userData.user.id);
     let userRoles = await this.getGuildRoles(userData.user.id);
 
+    if (!userRoles.some((role) => (this.config.Permissions.defaultRole).includes(role.ID))) {
+      return {
+        error: {
+          error: true,
+          message: "You don't have the required roles"
+        },
+        user: {}
+      };
+    }
+
     return {
       error: {
         error: false,

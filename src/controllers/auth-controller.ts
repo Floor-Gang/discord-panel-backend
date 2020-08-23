@@ -25,7 +25,7 @@ export class AuthController implements IController {
     // If authcode is invalid for some reason, give status code 401
     if (memberInfo.error.error) {
       res.status(401)
-      res.json(memberInfo.error)
+      return res.json(memberInfo.error)
     }
 
     return res.json(memberInfo.user)
@@ -37,7 +37,7 @@ export class AuthController implements IController {
     // If authcode is invalid for some reason, give status code 401
     if (memberInfo.error.error) {
       res.status(401)
-      res.json(memberInfo.error)
+      return res.json(memberInfo.error)
     }
 
     return res.json(memberInfo.user)
