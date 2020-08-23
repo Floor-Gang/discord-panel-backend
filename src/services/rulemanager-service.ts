@@ -52,11 +52,10 @@ export class RuleManagerService {
         return {
           success: true
         }
-      } else {
-        return {
-          success: false
+      }
 
-        }
+      return {
+        success: false
       }
     })
     .catch(async (err: discordjs.DiscordAPIError) => {
