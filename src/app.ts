@@ -76,20 +76,23 @@ const mainAsync = async () => {
     next();
   })
 
-  // If authentication fails ^
-  const error = (res) => {
-    res.status(401)
-    return res.json({
-      status: 401,
-      message: 'Unauthorized'
-    });
-  }
+  // Authentication for inside the controller
+  global.middlewareRoles = (checkRoles: string[]) => {
+    app.use((req: any, res, next) => {
+      if (!req.user.Roles.some((role) => checkRoles.includes(role.ID))) {
+       return error(res);
+      }
+
+      return next();
+    })
+  };
 
   // Attach controllers
   app.use('/auth', container.resolve<IController>(AuthController).getRouter())
   app.use('/modmail', container.resolve<IController>(ModmailController).getRouter())
   app.use('/rule-manager', container.resolve<IController>(RuleManagerController).getRouter())
 
+  // Start that boy
   app.listen(config.ExpressPort, () => {
     console.log('Starting the bot...');
   });
@@ -97,6 +100,15 @@ const mainAsync = async () => {
   global.DiscordBot.on('ready', () => {
     console.log('Started! Backend running')
   })
+
+  // If authentication fails ^
+  const error = (res) => {
+    return res.status(401)
+    .json({
+      status: 401,
+      message: "Unauthorized",
+    });
+  };
 };
 
 mainAsync();

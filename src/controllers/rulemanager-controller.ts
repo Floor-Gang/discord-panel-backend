@@ -1,14 +1,16 @@
 import { IController } from '../types/controllers';
 import { Router } from 'express';
 import { RuleManagerService } from '../services/rulemanager-service';
-import { autoInjectable } from 'tsyringe';
+import { autoInjectable, inject } from 'tsyringe';
 
 @autoInjectable()
 export class RuleManagerController implements IController {
   RuleManagerService: RuleManagerService;
+  Config: Config;
 
-  constructor(RuleManagerService: RuleManagerService) {
+  constructor(@inject("Config") config: Config, RuleManagerService: RuleManagerService) {
     this.RuleManagerService = RuleManagerService;
+    this.Config = config;
   }
 
   getRuleSettings = async (req, res) => {
@@ -34,6 +36,9 @@ export class RuleManagerController implements IController {
 
   getRouter = (): Router => {
     const router = Router();
+
+    // Authenticate
+    global.middlewareRoles(this.Config.Permissions.ruleManager)
 
     // Nothing to do with auth just uhm 
     router.get('/get', this.getRuleSettings)

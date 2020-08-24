@@ -4,8 +4,9 @@ declare global {
   namespace NodeJS {
     interface Global {
       DiscordBot: discordjs.Client;
-      authenticateUser: any;
-      getUserInfo: any;
+      authenticateUser: (accessKey: string, checkRoles: string[]) => any;
+      getUserInfo: (code: string) => any;
+      middlewareRoles: (checkRoles: string[]) => any;
     }
   }
 }
