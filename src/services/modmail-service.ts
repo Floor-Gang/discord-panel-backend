@@ -39,35 +39,38 @@ export class ModmailService {
       connection: config.Database
     });
     this.config = config;
-    this.postgresTables = ["all_messages_attachments", "categories", 
-                           "conversations", "messages", "muted", "notes", 
-                           "permissions", "standardreplies"];
+    this.postgresTables = [
+      'all_messages_attachments',
+      'categories',
+      'conversations',
+      'messages',
+      'muted',
+      'notes',
+      'permissions',
+      'standardreplies',
+    ];
   }
 
-  // Do I use this?
-  // activeConversations = async () => {
-  // or do I use this?
-  async activeConversations(): Promise<any> {
-    return this.knex('modmail.conversations')
+  async getActiveConversations(): Promise<any> {
+    return this.knex('modmail.conversationsbingbong')
      .where({'active': true})
      .select('*')
      .on('query-response', (response: Promise<any>) => {
        return response
      })
-     .then((response: Promise<any>) => {
-       return response
-     })
      .catch((err: Error) => {
-       return err
+      return {
+        error: err
+      }
      })
   }
 
-  async fullConversation(conversationID: bigint): Promise<any> {
+  async getFullConversation(conversationID: bigint): Promise<any> {
     let conversations: Array<object>;
     conversations = await this.knex('modmail.conversations')
      .select('conversation_id')
      .catch((err: Error) => {
-      return err
+      return null
     })
 
     let conversationIDs = [];
@@ -86,15 +89,14 @@ export class ModmailService {
      .on('query-response', (response: Promise<any>) => {
        return response
      })
-      .then((response: Promise<any>) => {
-       return response
-     })
       .catch((err: Error) => {
-       return err
+        return {
+          error: err
+        }
      })
   }
 
-  async allEntries(table: string): Promise<any> {
+  async getAllEntries(table: string): Promise<any> {
     if (!this.postgresTables.some(x => x === table)) {
       return new ValueError(table, this.postgresTables)
     }
@@ -104,15 +106,14 @@ export class ModmailService {
      .on('query-response', (response: Promise<any>) => {
       return response
     })
-     .then((response: Promise<any>) => {
-      return response
-    })
      .catch((err: Error) => {
-      return err
+      return {
+        error: err
+      }
     })
   }
 
-  async allEntriesBool(table: string, active: boolean): Promise<any> {
+  async getAllActiveOrInactiveEntries(table: string, active: boolean): Promise<any> {
     if (!this.postgresTables.some(x => x === table)) {
       return new ValueError(table, this.postgresTables)
     }
@@ -123,20 +124,19 @@ export class ModmailService {
      .on('query-response', (response: Promise<any>) => {
       return response
     })
-     .then((response: Promise<any>) => {
-      return response
-    })
      .catch((err: Error) => {
-      return err
+      return {
+        error: err
+      }
     })
   }
 
-  async categoryPermissions(categoryID: bigint): Promise<any> {
+  async getCategoryPermissions(categoryID: bigint): Promise<any> {
     let categories: string[];
     categories = await this.knex('modmail.categories')
      .select('category_id')
      .catch((err: Error) => {
-      return err
+      return null
     })
 
     let categoryIDs = [];
@@ -158,11 +158,10 @@ export class ModmailService {
      .on('query-response', (response: Promise<any>) => {
       return response
     })
-     .then((response: Promise<any>) => {
-      return response
-    })
      .catch((err: Error) => {
-      return err
+      return {
+        error: err
+      }
     })
   }
 }
