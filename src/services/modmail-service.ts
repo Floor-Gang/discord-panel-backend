@@ -1,5 +1,4 @@
 import {autoInjectable, inject} from "tsyringe";
-import { Pool, Client } from "pg";
 
 class BaseError {
   constructor () {
@@ -52,7 +51,7 @@ export class ModmailService {
     return this.knex('modmail.conversations')
      .where({'active': true})
      .select('*')
-     .on('query-response', function(response: Promise<any>) {
+     .on('query-response', (response: Promise<any>) => {
        return response
      })
      .then((response: Promise<any>) => {
@@ -71,7 +70,7 @@ export class ModmailService {
       return err
     })
 
-    let conversationIDs = new Array();
+    let conversationIDs = [];
     for (let convID of conversations) {
       conversationIDs.push(Object.values(convID)[0]);
     }
@@ -84,7 +83,7 @@ export class ModmailService {
      .join('modmail.all_messages_attachments', 'conversations.conversation_id', '=', 'all_messages_attachments.conversation_id')
      .where({'conversations.conversation_id': conversationID.toString()})
      .select('*')
-     .on('query-response', function(response: Promise<any>) {
+     .on('query-response', (response: Promise<any>) => {
        return response
      })
       .then((response: Promise<any>) => {
@@ -100,9 +99,9 @@ export class ModmailService {
       return new ValueError(table, this.postgresTables)
     }
 
-    return this.knex("modmail."+table)
+    return this.knex(`modmail.${table}`)
      .select('*')
-     .on('query-response', function(response: Promise<any>) {
+     .on('query-response', (response: Promise<any>) => {
       return response
     })
      .then((response: Promise<any>) => {
@@ -118,10 +117,10 @@ export class ModmailService {
       return new ValueError(table, this.postgresTables)
     }
 
-    return this.knex("modmail."+table)
+    return this.knex(`modmail.${table}`)
      .where('active', active)
      .select('*')
-     .on('query-response', function(response: Promise<any>) {
+     .on('query-response', (response: Promise<any>) => {
       return response
     })
      .then((response: Promise<any>) => {
@@ -140,7 +139,7 @@ export class ModmailService {
       return err
     })
 
-    let categoryIDs = new Array();
+    let categoryIDs = [];
     for (let catID of categories) {
       categoryIDs.push(Object.values(catID)[0]);
     }
@@ -156,7 +155,7 @@ export class ModmailService {
        'categories.category_id': categoryID.toString()
       })
      .select('*')
-     .on('query-response', function(response: Promise<any>) {
+     .on('query-response', (response: Promise<any>) => {
       return response
     })
      .then((response: Promise<any>) => {
