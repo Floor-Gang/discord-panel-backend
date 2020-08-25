@@ -1,5 +1,6 @@
 type Config = {
   ExpressPort: number,
+  ErrorLogChannel: string,
   DiscordToken: string;
   DiscordAccessKey: string;
   DiscordSecretKey: string;
@@ -36,4 +37,10 @@ type Role = {
 type postRules = {
   rules: object[];
   channel: string;
+}
+
+type discordError = {
+  path: string;
+  message: string;
+  httpStatus: number;
 }

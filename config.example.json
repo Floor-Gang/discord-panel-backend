@@ -1,5 +1,6 @@
 {
     "ExpressPort": 8080,
+    "ErrorLogChannel": "",
     "DiscordToken": "",
     "DiscordAccessKey": "",
     "DiscordSecretKey": "",

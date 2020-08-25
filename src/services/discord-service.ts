@@ -21,11 +21,11 @@ export class DiscordService {
     this.oauthScopes = config.DiscordScopes;
   }
 
-  initAuthorize = async (code) => {  
+  initAuthorize = async (code) => {
     const response = await axios({
       method: 'POST',
-      headers: { 
-        'content-type': 'application/x-www-form-urlencoded' 
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded'
       },
       data: qs.stringify({
         client_id: this.oauthAccessToken,
@@ -54,7 +54,7 @@ export class DiscordService {
     })
     .catch((err) => {
       console.log(`discord-service - GetCurrentUser ${err.response}`);
-  
+
       return {
         error: true,
         user: {},

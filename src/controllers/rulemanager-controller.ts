@@ -40,7 +40,7 @@ export class RuleManagerController implements IController {
     // Authenticate
     global.middlewareRoles(this.Config.Permissions.ruleManager)
 
-    // Nothing to do with auth just uhm 
+    // Nothing to do with auth just uhm
     router.get('/get', this.getRuleSettings)
 
     // Posting the rules.
@@ -48,7 +48,7 @@ export class RuleManagerController implements IController {
 
     // Get the channels that you can post them in
     router.get('/channels', this.getChannels)
-  
+
     return router;
   }
 }
