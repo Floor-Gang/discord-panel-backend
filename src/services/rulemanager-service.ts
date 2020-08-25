@@ -45,23 +45,22 @@ export class RuleManagerService {
         this.sendChannelMessage(ChannelID, { embed: embed })
       });
 
-      // Log changes in the db.
-      const logRules = await this.logRuleChange(newRules, userID);
+      // // Log changes in the db.
+      // const logRules = await this.logRuleChange(newRules, userID);
 
-      if (logRules) {
-        return {
-          success: true
-        }
-      }
+      // if (logRules) {
+      //   return {
+      //     success: true
+      //   }
+      // }
+
+      console.log(diffString(newRules, await this.getServerRules()))
 
       return {
         success: false
       }
     })
     .catch(async (err: discordjs.DiscordAPIError) => {
-      console.log(err.message)
-      // Probably 14 days old.
-
       return await actChannel.messages.fetch({ limit: 100 })
       .then((messageCollection: any) => {
         messageCollection.forEach(message => {
@@ -77,7 +76,8 @@ export class RuleManagerService {
         }
       })
       .catch((err) => {
-        console.log(err);
+        global.ErrorLogGlobal(`setServerRules`, global.DiscordBot.users.cache.get(userID).tag, err);
+
         return {
           success: false
         }

@@ -28,7 +28,7 @@ const mainAsync = async () => {
   // Initialize the discord bot
   global.DiscordBot = new discordjs.Client();
   global.DiscordBot.login(config.DiscordToken);
-  
+
   app.use(bodyParser.json());
   app.use(cors())
   app.use(bodyParser.urlencoded({ extended: false }));
@@ -43,13 +43,13 @@ const mainAsync = async () => {
   })
 
   app.use(async (req, res, next) => {
-    if(req.url.startsWith('/auth/')) { 
+    if(req.url.startsWith('/auth/')) {
       // URL Starts with /auth/ AKA is authorizing / logging in.
       return next();
     }
-   
+
     const authCode = req.header('Authorization');
-  
+
     if(!authCode) {
       return error(res);
     }
@@ -109,6 +109,25 @@ const mainAsync = async () => {
       message: "Unauthorized",
     });
   };
+
+  // Error embed sender
+  global.ErrorLogGlobal = async (title, tagUser, err) => {
+    const channel = global.DiscordBot.channels.cache.get(config.ErrorLogChannel) as discordjs.TextChannel;
+    return await channel.send(new discordjs.MessageEmbed()
+      .setColor('#d13434')
+      .setTitle(`Fatal error ${title}`)
+      .setDescription(`Action ran by **${tagUser}**`)
+      .addField('Error', err.message, false)
+      .addField('Path', err.path, false)
+      .setTimestamp()
+      .setFooter(`HTTP Status: ${err.httpStatus}`, global.DiscordBot.user.avatarURL()))
+    .then(() => {
+      return true;
+    })
+    .catch((err) => {
+      return false;
+    })
+  }
 };
 
 mainAsync();
