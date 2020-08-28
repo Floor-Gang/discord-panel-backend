@@ -45,16 +45,14 @@ export class RuleManagerService {
         this.sendChannelMessage(ChannelID, { embed: embed })
       });
 
-      // // Log changes in the db.
-      // const logRules = await this.logRuleChange(newRules, userID);
+      // Log changes in the db.
+      const logRules = await this.logRuleChange(newRules, userID);
 
-      // if (logRules) {
-      //   return {
-      //     success: true
-      //   }
-      // }
-
-      console.log(diffString(newRules, await this.getServerRules()))
+      if (logRules) {
+        return {
+          success: true
+        }
+      }
 
       return {
         success: false
