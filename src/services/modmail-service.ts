@@ -31,7 +31,6 @@ class ValueError extends BaseError {
 @autoInjectable()
 export class ModmailService {
   config: Config;
-  postgresTables: string[];
   knex: typeof require;
   modmailHelper: ModmailHelper;
 
@@ -43,17 +42,6 @@ export class ModmailService {
       client: 'pg',
       connection: config.Database
     });
-
-    this.postgresTables = [
-      'all_messages_attachments',
-      'categories',
-      'conversations',
-      'messages',
-      'muted',
-      'notes',
-      'permissions',
-      'standardreplies',
-    ];
   }
 
   getActiveConversations = async (): Promise<Conversation[]> => {
