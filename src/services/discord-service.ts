@@ -7,21 +7,8 @@ import { GuildMember, Role } from 'discord.js';
 export default class DiscordService {
   config: Config;
 
-  oauthAccessToken: string;
-
-  oauthSecretToken: string;
-
-  oauthRedirectUrl: string;
-
-  oauthScopes: string[];
-
   constructor(@inject('Config') config: Config) {
     this.config = config;
-
-    this.oauthAccessToken = config.DiscordAccessKey;
-    this.oauthSecretToken = config.DiscordSecretKey;
-    this.oauthRedirectUrl = config.DiscordRedirectUrl;
-    this.oauthScopes = config.DiscordScopes;
   }
 
   initAuthorize = async (code: string): Promise<any> => axios({
@@ -30,12 +17,12 @@ export default class DiscordService {
       'content-type': 'application/x-www-form-urlencoded',
     },
     data: qs.stringify({
-      client_id: this.oauthAccessToken,
-      client_secret: this.oauthSecretToken,
+      client_id: this.config.DiscordAccessKey,
+      client_secret: this.config.DiscordSecretKey,
       grant_type: 'authorization_code',
       code,
-      redirect_uri: this.oauthRedirectUrl,
-      scope: this.oauthScopes.join(' '),
+      redirect_uri: this.config.DiscordRedirectUrl,
+      scope: this.config.DiscordScopes.join(' '),
     }),
     url: 'https://discord.com/api/v6/oauth2/token',
   })
