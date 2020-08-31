@@ -48,6 +48,7 @@ export class AuthController implements IController {
 
     global.authenticateUser = this.discordService.authenticateCurrentUser;
     global.getUserInfo = this.discordService.getParsedInfo;
+    global.getDiscordUser = this.discordService.getMember;
 
     // Initial authentication
     router.get('/init-discord', this.getInitAuthDiscordAsync);

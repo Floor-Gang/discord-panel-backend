@@ -8,6 +8,7 @@ declare global {
       authenticateUser: (accessKey: string, checkRoles: string[]) => any;
       getUserInfo: (code: string) => any;
       middlewareRoles: (checkRoles: string[]) => any;
+      getDiscordUser: (userID: string) => discordjs.GuildMember;
     }
   }
 }
