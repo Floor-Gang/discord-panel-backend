@@ -33,7 +33,7 @@ export class ModmailHelper {
     }
   }
 
-  formatConversationMessage = (message): ConversationMessage => {
+  formatConversationMessage = (message, reqUrl): ConversationMessage => {
     return {
       MessageID: message.message_id,
       Author: {
@@ -46,7 +46,7 @@ export class ModmailHelper {
         Content: message.message,
         Deleted: message.deleted,
       },
-      attachment: message.attachment === null ? null : `http://localhost:8080/modmail/attachment/${message.message_id}`,
+      attachment: message.attachment === null ? null : `${reqUrl}/modmail/attachment/${message.message_id}`,
       CreatedAt: message.created_at,
     };
   }

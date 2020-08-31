@@ -16,7 +16,7 @@ export class ModmailController implements IController {
   }
 
   getFullConversation = async (req, res: any) => {
-    const data = await this.modmailService.getFullConversation(req.params.conversation)
+    const data = await this.modmailService.getFullConversation(req.params.conversation, `${req.protocol}://${req.get('Host')}`)
 
     if (data === null) {
       res.status(400)

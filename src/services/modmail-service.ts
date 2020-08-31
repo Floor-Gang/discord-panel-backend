@@ -71,7 +71,7 @@ export class ModmailService {
      })
   }
 
-  getFullConversation = async (conversationID: bigint): Promise<any> => {
+  getFullConversation = async (conversationID: bigint, reqUrl: string): Promise<any> => {
     let conversations: Array<object>;
     conversations = await this.knex('modmail.conversations')
      .select('conversation_id')
@@ -95,7 +95,7 @@ export class ModmailService {
       .then((columns) => {
         return {
           Conversation: this.modmailHelper.formatConversation(columns[0]),
-          Messages: columns.map((column) => { return this.modmailHelper.formatConversationMessage(column) }),
+          Messages: columns.map((column) => { return this.modmailHelper.formatConversationMessage(column, reqUrl) }),
         };
       })
       .catch((err: Error) => {
