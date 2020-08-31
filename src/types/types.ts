@@ -25,10 +25,10 @@ type Member = {
   AvatarHash: string,
   ProfileURL: string,
   Username: string,
-  Roles: Role[]
+  Roles: MemberRole[]
 }
 
-type Role = {
+type MemberRole = {
   ID: string;
   Name: string;
   Color: string;

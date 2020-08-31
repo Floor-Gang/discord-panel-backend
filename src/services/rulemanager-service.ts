@@ -1,103 +1,90 @@
-import {autoInjectable, inject} from "tsyringe";
-import { Pool, Client } from "pg";
+import { autoInjectable, inject } from 'tsyringe';
+import { Pool } from 'pg';
+// eslint-disable-next-line no-unused-vars
 import * as discordjs from 'discord.js';
 
 @autoInjectable()
-export class RuleManagerService {
+export default class RuleManagerService {
   config: Config;
+
   postgres: Pool;
 
-  constructor(@inject("Config") config: Config) {
-    this.postgres = new Pool(config.Database)
+  constructor(@inject('Config') config: Config) {
+    this.postgres = new Pool(config.Database);
     this.config = config;
   }
 
-  getServerRules = async () => {
-    return await this.postgres
-      .query(`select * from ${this.config.Rules.tableName} order by id desc  limit 1`)
-      .then((res) => {
-        return res.rows[0].rules
-      })
-      .catch((err) => {
-        return {
-          error: true,
-        }
-      })
-  }
+  getServerRules = async () => this.postgres
+    .query(`select * from ${this.config.Rules.tableName} order by id desc  limit 1`)
+    .then((res) => res.rows[0].rules)
+    .catch(() => ({
+      error: true,
+    }))
 
-  logRuleChange = async (newRules, userID) => {
-    return await this.postgres
+  logRuleChange = async (newRules, userID) => this.postgres
     .query(`INSERT INTO ${this.config.Rules.tableName} (user_id, rules) VALUES ($1, $2)`, [userID, JSON.stringify(newRules)])
-    .then(() => {
-      return true;
-    })
-    .catch((err) => {
-      console.log(err);
-      return false;
-    })
-  }
+    .then(() => true)
+    .catch(() => false)
 
   setServerRules = async (newRules, ChannelID, userID) => {
     const actChannel = global.DiscordBot.channels.cache.get(ChannelID) as discordjs.TextChannel;
-    return await actChannel.bulkDelete(100)
-    .then(async () => {
-      newRules.forEach(embed => {
-        this.sendChannelMessage(ChannelID, { embed: embed })
-      });
-
-      // Log changes in the db.
-      const logRules = await this.logRuleChange(newRules, userID);
-
-      if (logRules) {
-        return {
-          success: true
-        }
-      }
-
-      return {
-        success: false
-      }
-    })
-    .catch(async (err: discordjs.DiscordAPIError) => {
-      return await actChannel.messages.fetch({ limit: 100 })
-      .then((messageCollection: any) => {
-        messageCollection.forEach(message => {
-          message.delete()
+    return actChannel.bulkDelete(100)
+      .then(async () => {
+        newRules.forEach((embed) => {
+          this.sendChannelMessage(ChannelID, { embed });
         });
 
-        newRules.forEach(embed => {
-          this.sendChannelMessage(ChannelID, { embed: embed })
-        });
+        // Log changes in the db.
+        const logRules = await this.logRuleChange(newRules, userID);
+
+        if (logRules) {
+          return {
+            success: true,
+          };
+        }
 
         return {
-          success: true
-        }
+          success: false,
+        };
       })
-      .catch((err) => {
-        global.ErrorLogGlobal(`setServerRules`, global.DiscordBot.users.cache.get(userID).tag, err);
+      .catch(async (err: discordjs.DiscordAPIError) => actChannel.messages.fetch({ limit: 100 })
+        .then((messageCollection: any) => {
+          messageCollection.forEach((message) => {
+            message.delete();
+          });
 
-        return {
-          success: false
-        }
-      })
-    })
+          newRules.forEach((embed) => {
+            this.sendChannelMessage(ChannelID, { embed });
+          });
+
+          return {
+            success: true,
+          };
+        })
+        .catch(() => {
+          global.ErrorLogGlobal('setServerRules', global.DiscordBot.users.cache.get(userID).tag, err);
+
+          return {
+            success: false,
+          };
+        }));
   }
 
   sendChannelMessage = (channelID, message) => {
     const channel = global.DiscordBot.channels.cache.get(channelID) as discordjs.TextChannel;
-    channel.send(message)
+    channel.send(message);
   }
 
   getServerChannelData = () => {
-   const channels = global.DiscordBot.guilds.cache.get(this.config.DiscordGuildID).channels.cache.map((obj) => {
-    if (obj.parentID == this.config.Rules.categoryID) {
-      return {
+    const channels = global.DiscordBot.guilds.cache
+      .get(this.config.DiscordGuildID)
+      .channels.cache
+      .filter((channel) => channel.parentID === this.config.Rules.categoryID)
+      .map((obj): any => ({
         id: obj.id,
         name: `#${obj.name}`,
-      };
-    }
-   })
+      }));
 
-   return channels.filter(x => x)
+    return channels.filter((x) => x);
   }
 }

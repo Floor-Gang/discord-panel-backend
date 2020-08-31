@@ -1,11 +1,10 @@
-import { IController } from '../types/controllers';
 import { Router } from 'express';
-import { DiscordService } from '../services/discord-service';
 import { autoInjectable } from 'tsyringe';
-import { GuildMember } from 'discord.js';
+import { IController } from '../types/controllers';
+import DiscordService from '../services/discord-service';
 
 @autoInjectable()
-export class AuthController implements IController {
+export default class AuthController implements IController {
   discordService: DiscordService;
 
   constructor(discordService: DiscordService) {
@@ -13,34 +12,34 @@ export class AuthController implements IController {
   }
 
   getInitAuthDiscordAsync = async (req, res) => {
-    let response = await this.discordService.initAuthorize(req.query.code);
+    const response = await this.discordService.initAuthorize(req.query.code);
 
     if (response.error != null) {
-      res.status(401)
-      return res.json(response)
+      res.status(401);
+      return res.json(response);
     }
 
-    const memberInfo = await this.discordService.getParsedInfo(response.access_token)
+    const memberInfo = await this.discordService.getParsedInfo(response.access_token);
 
     // If authcode is invalid for some reason, give status code 401
     if (memberInfo.error.error) {
-      res.status(401)
-      return res.json(memberInfo.error)
+      res.status(401);
+      return res.json(memberInfo.error);
     }
 
-    return res.json(memberInfo.user)
+    return res.json(memberInfo.user);
   }
 
   getAuthDiscordAsync = async (req, res) => {
-    const memberInfo = await this.discordService.getParsedInfo(req.query.code)
+    const memberInfo = await this.discordService.getParsedInfo(req.query.code);
 
     // If authcode is invalid for some reason, give status code 401
     if (memberInfo.error.error) {
-      res.status(401)
-      return res.json(memberInfo.error)
+      res.status(401);
+      return res.json(memberInfo.error);
     }
 
-    return res.json(memberInfo.user)
+    return res.json(memberInfo.user);
   }
 
   getRouter = (): Router => {

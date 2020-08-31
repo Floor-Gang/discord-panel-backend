@@ -1,26 +1,33 @@
 import 'reflect-metadata';
 
 import * as express from 'express';
-import { ConfigService } from './services/config-service';
 import { container } from 'tsyringe';
-import { IController } from './types/controllers';
 import * as bodyParser from 'body-parser';
 import * as discordjs from 'discord.js';
 import * as cors from 'cors';
+import { IController } from './types/controllers';
+import ConfigService from './services/config-service';
 
 // Controllers
-import { AuthController } from './controllers/auth-controller';
-import { ModmailController } from './controllers/modmail-controller';
-import { RuleManagerController } from './controllers/rulemanager-controller';
+import AuthController from './controllers/auth-controller';
+import ModmailController from './controllers/modmail-controller';
+import RuleManagerController from './controllers/rulemanager-controller';
 
 // Entry point for the app.
 const mainAsync = async () => {
   const app = express();
 
+  // If authentication fails ^
+  const error = (res) => res.status(401)
+    .json({
+      status: 401,
+      message: 'Unauthorized',
+    });
+
   const config = new ConfigService<Config>().loadConfigFromPath('./config.json');
-  if(config == null) {
+  if (config == null) {
     throw new Error(`config was not read properly. Please copy config.example.json and fill in the
-                      properties.`)
+                      properties.`);
   }
 
   container.register<Config>('Config', { useValue: config });
@@ -30,7 +37,7 @@ const mainAsync = async () => {
   global.DiscordBot.login(config.DiscordToken);
 
   app.use(bodyParser.json());
-  app.use(cors())
+  app.use(cors());
   app.use(bodyParser.urlencoded({ extended: false }));
 
   app.use((req, res, next) => {
@@ -38,19 +45,20 @@ const mainAsync = async () => {
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
     // Intended log for live debugging.
-    console.log(`${req.method} - ${req.url}\n`)
+    // eslint-disable-next-line no-console
+    console.log(`${req.method} - ${req.url}\n`);
     next();
-  })
+  });
 
   app.use(async (req, res, next) => {
-    if(req.url.startsWith('/auth/')) {
+    if (req.url.startsWith('/auth/')) {
       // URL Starts with /auth/ AKA is authorizing / logging in.
       return next();
     }
 
     const authCode = req.header('Authorization');
 
-    if(!authCode) {
+    if (!authCode) {
       return error(res);
     }
 
@@ -59,7 +67,7 @@ const mainAsync = async () => {
     }
 
     return error(res);
-  })
+  });
 
   app.use(async (req: any, res, next) => {
     if (!(req.url).startsWith('/auth/')) {
@@ -73,47 +81,41 @@ const mainAsync = async () => {
       req.user = userData.user;
     }
 
-    next();
-  })
+    return next();
+  });
 
   // Authentication for inside the controller
   global.middlewareRoles = (checkRoles: string[]) => {
     app.use((req: any, res, next) => {
       if (!req.user.Roles.some((role) => checkRoles.includes(role.ID))) {
-       return error(res);
+        return error(res);
       }
 
       return next();
-    })
+    });
   };
 
   // Attach controllers
-  app.use('/auth', container.resolve<IController>(AuthController).getRouter())
-  app.use('/modmail', container.resolve<IController>(ModmailController).getRouter())
-  app.use('/rule-manager', container.resolve<IController>(RuleManagerController).getRouter())
+  app.use('/auth', container.resolve<IController>(AuthController).getRouter());
+  app.use('/modmail', container.resolve<IController>(ModmailController).getRouter());
+  app.use('/rule-manager', container.resolve<IController>(RuleManagerController).getRouter());
 
   // Start that boy
   app.listen(config.ExpressPort, () => {
+    // eslint-disable-next-line no-console
     console.log('Starting the bot...');
   });
 
   global.DiscordBot.on('ready', () => {
-    console.log('Started! Backend running')
-  })
-
-  // If authentication fails ^
-  const error = (res) => {
-    return res.status(401)
-    .json({
-      status: 401,
-      message: "Unauthorized",
-    });
-  };
+    // eslint-disable-next-line no-console
+    console.log('Started! Backend running');
+  });
 
   // Error embed sender
   global.ErrorLogGlobal = async (title, tagUser, err) => {
-    const channel = global.DiscordBot.channels.cache.get(config.ErrorLogChannel) as discordjs.TextChannel;
-    return await channel.send(new discordjs.MessageEmbed()
+    const channel = global.DiscordBot.channels.cache
+      .get(config.ErrorLogChannel) as discordjs.TextChannel;
+    return channel.send(new discordjs.MessageEmbed()
       .setColor('#d13434')
       .setTitle(`Fatal error ${title}`)
       .setDescription(`Action ran by **${tagUser}**`)
@@ -121,13 +123,9 @@ const mainAsync = async () => {
       .addField('Path', err.path, false)
       .setTimestamp()
       .setFooter(`HTTP Status: ${err.httpStatus}`, global.DiscordBot.user.avatarURL()))
-    .then(() => {
-      return true;
-    })
-    .catch((err) => {
-      return false;
-    })
-  }
+      .then(() => true)
+      .catch(() => false);
+  };
 };
 
 mainAsync();
