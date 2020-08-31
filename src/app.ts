@@ -112,10 +112,9 @@ const mainAsync = async () => {
   });
 
   // Error embed sender
-  global.ErrorLogGlobal = async (title, tagUser, err) => {
-    const channel = global.DiscordBot.channels.cache
-      .get(config.ErrorLogChannel) as discordjs.TextChannel;
-    return channel.send(new discordjs.MessageEmbed()
+  global.ErrorLogGlobal = async (title, tagUser, err) => (global.DiscordBot.channels.cache
+    .get(config.ErrorLogChannel) as discordjs.TextChannel)
+    .send(new discordjs.MessageEmbed()
       .setColor('#d13434')
       .setTitle(`Fatal error ${title}`)
       .setDescription(`Action ran by **${tagUser}**`)
@@ -123,9 +122,8 @@ const mainAsync = async () => {
       .addField('Path', err.path, false)
       .setTimestamp()
       .setFooter(`HTTP Status: ${err.httpStatus}`, global.DiscordBot.user.avatarURL()))
-      .then(() => true)
-      .catch(() => false);
-  };
+    .then(() => true)
+    .catch(() => false);
 };
 
 mainAsync();

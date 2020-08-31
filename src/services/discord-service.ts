@@ -24,38 +24,32 @@ export default class DiscordService {
     this.oauthScopes = config.DiscordScopes;
   }
 
-  initAuthorize = async (code) => {
-    const response = await axios({
-      method: 'POST',
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-      },
-      data: qs.stringify({
-        client_id: this.oauthAccessToken,
-        client_secret: this.oauthSecretToken,
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: this.oauthRedirectUrl,
-        scope: this.oauthScopes.join(' '),
-      }),
-      url: 'https://discord.com/api/v6/oauth2/token',
-    })
-      .catch((err) => err.response);
+  initAuthorize = async (code: string): Promise<any> => axios({
+    method: 'POST',
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+    },
+    data: qs.stringify({
+      client_id: this.oauthAccessToken,
+      client_secret: this.oauthSecretToken,
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: this.oauthRedirectUrl,
+      scope: this.oauthScopes.join(' '),
+    }),
+    url: 'https://discord.com/api/v6/oauth2/token',
+  })
+    .then((response) => response.data)
+    .catch((err) => err.response);
 
-    return response.data;
-  };
-
-  getCurrentUser = async (accessKey) => this.createDiscordRequest(accessKey, '/users/@me')
+  getCurrentUser = async (accessKey: string) => this.createDiscordRequest(accessKey, '/users/@me')
     .then((data) => ({
-      error: false,
+      error: !data?.username,
       user: data,
     }))
-    .catch(() => ({
-      error: true,
-      user: {},
-    }));
 
-  authenticateCurrentUser = async (Key: string, checkRoles: string[]) => this.getCurrentUser(Key)
+  authenticateCurrentUser = async (Key: string, checkRoles: string[]): Promise<boolean> => this
+    .getCurrentUser(Key)
     .then(async (data) => {
       if (data.error) {
         return false;
@@ -66,7 +60,7 @@ export default class DiscordService {
         .catch(() => false);
     })
 
-  getParsedInfo = async (code) => {
+  getParsedInfo = async (code: string): Promise<any> => {
     const userData = await this.getCurrentUser(code);
 
     if (userData.error) {
@@ -84,8 +78,11 @@ export default class DiscordService {
     const userRoles = await this.getGuildRoles(userData.user.id);
 
     if (!userRoles.some((role) => (this.config.Permissions.defaultRole).includes(role.ID))) {
-      // eslint-disable-next-line no-console
-      console.log(`${userData.user.username}#${memberInfo.user.discriminator} Attempted to access the panel.`);
+      global.ErrorLogGlobal('Authentication', memberInfo.user.tag, {
+        httpStatus: 400,
+        message: 'Missing required roles, attempted to access panel.',
+        path: '/auth/discord?code=HIDDEN_FOR_PRIVACY_REASONS',
+      });
 
       return {
         error: {
@@ -113,35 +110,23 @@ export default class DiscordService {
     };
   }
 
-  getGuildRoles = async (memberID) => {
-    const roles: MemberRole[] = [];
-    const member: GuildMember = this.getMember(memberID);
-    const actRoles = member.roles.cache
-      .sort((a: Role, b: Role) => a.position - b.position || Number(a.id) - Number(b.id));
+  getGuildRoles = async (memberID: string): Promise<MemberRole[]> => this
+    .getMember(memberID).roles.cache
+    .sort((a: Role, b: Role) => a.position - b.position || Number(a.id) - Number(b.id))
+    .map((role): MemberRole => ({
+      ID: role.id,
+      Name: role.name,
+      Color: role.hexColor,
+    })).reverse();
 
-    actRoles.forEach((role) => {
-      roles.push({
-        ID: role.id,
-        Name: role.name,
-        Color: role.hexColor,
-      });
-    });
-
-    // Sort from highest role in the hierarchy to lowest.
-    return roles.reverse();
-  };
-
-  getMember = (memberID) => global.DiscordBot.guilds.cache
+  getMember = (memberID): GuildMember => global.DiscordBot.guilds.cache
     .get(this.config.DiscordGuildID)
     .members.cache.get(memberID)
 
-  createDiscordRequest = async (accessKey, path) => {
-    const response = await axios.get(`https://discord.com/api/v6${path}`, {
-      headers: {
-        Authorization: `Bearer ${accessKey}`,
-      },
-    });
-
-    return response.data;
-  }
+  createDiscordRequest = async (accessKey: string, path: string) => axios.get(`https://discord.com/api/v6${path}`, {
+    headers: {
+      Authorization: `Bearer ${accessKey}`,
+    },
+  }).then((response) => response.data)
+    .catch((err) => err.response)
 }

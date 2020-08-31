@@ -34,10 +34,7 @@ export default class RuleManagerService {
           this.sendChannelMessage(ChannelID, { embed });
         });
 
-        // Log changes in the db.
-        const logRules = await this.logRuleChange(newRules, userID);
-
-        if (logRules) {
+        if (await this.logRuleChange(newRules, userID)) {
           return {
             success: true,
           };
@@ -48,7 +45,7 @@ export default class RuleManagerService {
         };
       })
       .catch(async (err: discordjs.DiscordAPIError) => actChannel.messages.fetch({ limit: 100 })
-        .then((messageCollection: any) => {
+        .then(async (messageCollection: any) => {
           messageCollection.forEach((message) => {
             message.delete();
           });
@@ -56,6 +53,12 @@ export default class RuleManagerService {
           newRules.forEach((embed) => {
             this.sendChannelMessage(ChannelID, { embed });
           });
+
+          if (await this.logRuleChange(newRules, userID)) {
+            return {
+              success: true,
+            };
+          }
 
           return {
             success: true,
@@ -75,16 +78,13 @@ export default class RuleManagerService {
     channel.send(message);
   }
 
-  getServerChannelData = () => {
-    const channels = global.DiscordBot.guilds.cache
-      .get(this.config.DiscordGuildID)
-      .channels.cache
-      .filter((channel) => channel.parentID === this.config.Rules.categoryID)
-      .map((obj): any => ({
-        id: obj.id,
-        name: `#${obj.name}`,
-      }));
-
-    return channels.filter((x) => x);
-  }
+  getServerChannelData = () => global.DiscordBot.guilds.cache
+    .get(this.config.DiscordGuildID)
+    .channels.cache
+    .filter((channel) => channel.parentID === this.config.Rules.categoryID)
+    .map((channel): any => ({
+      id: channel.id,
+      name: `#${channel.name}`,
+    }))
+    .filter((channel) => channel)
 }
