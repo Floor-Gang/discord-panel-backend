@@ -1,3 +1,8 @@
+type FullConversation = {
+    Conversation: Conversation,
+    Messages: ConversationMessage[]
+};
+
 type Conversation = {
     ConversationID: number;
     Active: boolean;
@@ -31,4 +36,9 @@ type ConversationMessage = {
     };
     attachment: string | null;
     CreatedAt: string;
+}
+
+type ModmailError = {
+    status: number,
+    message: string,
 }

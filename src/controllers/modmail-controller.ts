@@ -1,29 +1,28 @@
-import { IController } from '../types/controllers';
 import { Router } from 'express';
-import { ModmailService } from '../services/modmail-service';
 import { autoInjectable } from 'tsyringe';
+import { IController } from '../types/controllers';
+import ModmailService from '../services/modmail-service';
 
 @autoInjectable()
-export class ModmailController implements IController {
+export default class ModmailController implements IController {
   modmailService: ModmailService;
 
-  constructor(ModmailService: ModmailService) {
-    this.modmailService = ModmailService;
+  constructor(modmailService: ModmailService) {
+    this.modmailService = modmailService;
   }
 
-  getActiveConversations = async (req, res: any) => {
-    return res.json(await this.modmailService.getActiveConversations())
-  }
+  getActiveConversations = async (req, res: any) => res
+    .json(await this.modmailService.getActiveConversations())
 
   getFullConversation = async (req, res: any) => {
-    const data = await this.modmailService.getFullConversation(req.params.conversation, `${req.protocol}://${req.get('Host')}`)
+    const data = await this.modmailService.getFullConversation(req.params.conversation, `${req.protocol}://${req.get('Host')}`);
 
-    if (data === null) {
-      res.status(400)
-      return res.json(data.error)
+    if (data) {
+      res.status(400);
+      return res.json(data);
     }
 
-    return res.json(data)
+    return res.json(data);
   }
 
   getAttachment = async (req, res: any) => {
@@ -34,18 +33,18 @@ export class ModmailController implements IController {
       return res.json(data);
     }
 
-    return res.end(data, 'binary')
+    return res.end(data, 'binary');
   }
 
   getCategoryPermissions = async (req, res: any) => {
-    const data = await this.modmailService.getCategoryPermissions(req.params.category)
+    const data = await this.modmailService.getCategoryPermissions(req.params.category);
 
     if (data == null) {
-      res.status(400)
-      return res.json(data.error)
+      res.status(400);
+      return res.json(data.error);
     }
 
-    return res.json(data)
+    return res.json(data);
   }
 
   getRouter = (): Router => {
