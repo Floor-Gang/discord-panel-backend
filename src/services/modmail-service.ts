@@ -1,4 +1,5 @@
 import {autoInjectable, inject} from "tsyringe";
+import { ModmailHelper } from './../helpers/modmail-helper';
 
 class BaseError {
   constructor () {
@@ -32,13 +33,17 @@ export class ModmailService {
   config: Config;
   postgresTables: string[];
   knex: typeof require;
+  modmailHelper: ModmailHelper;
 
   constructor(@inject("Config") config: Config) {
+    this.modmailHelper = new ModmailHelper(global.DiscordBot);
+    this.config = config;
+
     this.knex = require('knex')({
       client: 'pg',
       connection: config.Database
     });
-    this.config = config;
+
     this.postgresTables = [
       'all_messages_attachments',
       'categories',
@@ -51,21 +56,22 @@ export class ModmailService {
     ];
   }
 
-  async getActiveConversations(): Promise<any> {
-    return this.knex('modmail.conversationsbingbong')
+  getActiveConversations = async (): Promise<Conversation[]> => {
+    return await this.knex('modmail.conversations')
      .where({'active': true})
      .select('*')
-     .on('query-response', (response: Promise<any>) => {
-       return response
-     })
-     .catch((err: Error) => {
-      return {
-        error: err
-      }
+     .then((columns): Conversation[] => {
+        return columns.map((row): Conversation => {
+          return this.modmailHelper.formatConversation(row);
+        });
+     }).catch((err) => {
+      console.log(err)
+
+      return {} as Conversation[];
      })
   }
 
-  async getFullConversation(conversationID: bigint): Promise<any> {
+  getFullConversation = async (conversationID: bigint): Promise<any> => {
     let conversations: Array<object>;
     conversations = await this.knex('modmail.conversations')
      .select('conversation_id')
@@ -83,56 +89,40 @@ export class ModmailService {
     }
 
     return this.knex('modmail.conversations')
-     .join('modmail.all_messages_attachments', 'conversations.conversation_id', '=', 'all_messages_attachments.conversation_id')
-     .where({'conversations.conversation_id': conversationID.toString()})
-     .select('*')
-     .on('query-response', (response: Promise<any>) => {
-       return response
-     })
+      .join('modmail.all_messages_attachments', 'conversations.conversation_id', '=', 'all_messages_attachments.conversation_id')
+      .where({'conversations.conversation_id': conversationID.toString()})
+      .select('*')
+      .then((columns) => {
+        return {
+          Conversation: this.modmailHelper.formatConversation(columns[0]),
+          Messages: columns.map((column) => { return this.modmailHelper.formatConversationMessage(column) }),
+        };
+      })
       .catch((err: Error) => {
         return {
           error: err
         }
-     })
+      })
   }
 
-  async getAllEntries(table: string): Promise<any> {
-    if (!this.postgresTables.some(x => x === table)) {
-      return new ValueError(table, this.postgresTables)
-    }
-
-    return this.knex(`modmail.${table}`)
-     .select('*')
-     .on('query-response', (response: Promise<any>) => {
-      return response
-    })
-     .catch((err: Error) => {
-      return {
-        error: err
-      }
-    })
+  getAttachment = async (messageID: string): Promise<any>  => {
+    return this.knex('modmail.all_messages_attachments')
+      .where({message_id: messageID})
+      .select('*')
+      .then((columns) => {
+        return columns[0].attachment;
+      })
+      .catch((err) => {
+        return {
+          error: 404,
+          message: 'File not found.'
+        }
+      })
   }
 
-  async getAllActiveOrInactiveEntries(table: string, active: boolean): Promise<any> {
-    if (!this.postgresTables.some(x => x === table)) {
-      return new ValueError(table, this.postgresTables)
-    }
-
-    return this.knex(`modmail.${table}`)
-     .where('active', active)
-     .select('*')
-     .on('query-response', (response: Promise<any>) => {
-      return response
-    })
-     .catch((err: Error) => {
-      return {
-        error: err
-      }
-    })
-  }
-
-  async getCategoryPermissions(categoryID: bigint): Promise<any> {
+  getCategoryPermissions = async (categoryID: bigint): Promise<any> => {
     let categories: string[];
+
     categories = await this.knex('modmail.categories')
      .select('category_id')
      .catch((err: Error) => {

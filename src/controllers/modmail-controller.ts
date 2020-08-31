@@ -5,54 +5,46 @@ import { autoInjectable } from 'tsyringe';
 
 @autoInjectable()
 export class ModmailController implements IController {
-  ModmailService: ModmailService;
+  modmailService: ModmailService;
 
   constructor(ModmailService: ModmailService) {
-    this.ModmailService = ModmailService;
+    this.modmailService = ModmailService;
   }
 
   getActiveConversations = async (req, res: any) => {
-    const data = await this.ModmailService.getActiveConversations();
-    if (data == null) { 
-      res.status(400)
-      return res.json(data.error)
-    }
-    return res.json(data)
-  }
-
-  getAll = async (req, res: any) => {
-    const data = await this.ModmailService.getAllEntries(req.params.table);
-    if (data == null) {
-      res.status(400)
-      return res.json(data.error)
-    }
-    return res.json(data)
+    return res.json(await this.modmailService.getActiveConversations())
   }
 
   getFullConversation = async (req, res: any) => {
-    const data = await this.ModmailService.getFullConversation(req.params.conversationID)
-    if (data == null) {
+    const data = await this.modmailService.getFullConversation(req.params.conversation)
+
+    if (data === null) {
       res.status(400)
       return res.json(data.error)
     }
+
     return res.json(data)
   }
 
-  getAllActiveOrInactive = async (req, res: any) => {
-    const data = await this.ModmailService.getAllActiveOrInactiveEntries(req.params.table, req.params.active)
-    if (data == null) {
-      res.status(400)
-      return res.json(data.error)
+  getAttachment = async (req, res: any) => {
+    const data = await this.modmailService.getAttachment(req.params.message);
+
+    if (data.error !== undefined) {
+      res.status(404);
+      return res.json(data);
     }
-    return res.json(data)
+
+    return res.end(data, 'binary')
   }
 
   getCategoryPermissions = async (req, res: any) => {
-    const data = await this.ModmailService.getCategoryPermissions(req.params.categoryID)
+    const data = await this.modmailService.getCategoryPermissions(req.params.category)
+
     if (data == null) {
       res.status(400)
       return res.json(data.error)
     }
+
     return res.json(data)
   }
 
@@ -61,15 +53,16 @@ export class ModmailController implements IController {
 
     // Get all active conversations
     router.get('/conversations/active/get', this.getActiveConversations);
+
     // Get all messages and attachments for a conversation
-    router.get('/conversation/:conversationID/full', this.getFullConversation);
-    // Get all entries from a table in the modmail schema
-    router.get('/:table/all', this.getAll);
-    // Get all active or inactive entries from a table in the modmail schema
-    router.get('/:table/:active/all', this.getAllActiveOrInactive);
+    router.get('/conversation/:conversation/full', this.getFullConversation);
+
+    // Get attachment of the message
+    router.get('/attachment/:message', this.getAttachment);
+
     // Get all active permissions for a category
-    router.get('/category/:categoryID/permissions', this.getCategoryPermissions);
-  
+    router.get('/category/:category/permissions', this.getCategoryPermissions);
+
     return router;
   }
 }

@@ -28,7 +28,7 @@ const mainAsync = async () => {
   // Initialize the discord bot
   global.DiscordBot = new discordjs.Client();
   global.DiscordBot.login(config.DiscordToken);
-  
+
   app.use(bodyParser.json());
   app.use(cors())
   app.use(bodyParser.urlencoded({ extended: false }));
@@ -43,13 +43,13 @@ const mainAsync = async () => {
   })
 
   app.use(async (req, res, next) => {
-    if(req.url.startsWith('/auth/')) { 
+    if(req.url.startsWith('/auth/')) {
       // URL Starts with /auth/ AKA is authorizing / logging in.
       return next();
     }
-   
+
     const authCode = req.header('Authorization');
-  
+
     if(!authCode) {
       return error(res);
     }
