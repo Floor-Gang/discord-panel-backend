@@ -1,72 +1,72 @@
 type FullConversation = {
-    Error: ModmailError | boolean,
-    Conversation: Conversation,
-    Messages: ConversationMessage[]
+  Error: ModmailError | boolean,
+  Conversation: Conversation,
+  Messages: ConversationMessage[]
 };
 
 type Conversation = {
-    ConversationID: number;
-    Active: boolean;
-    User: {
-        username: string;
-        userID: string;
-    }
-    Meta: {
-        GuildName: string;
-        CategoryName: string;
-        CategoryID: string;
-        ChannelName: string;
-        ChannelID: string;
-    }
-    LastUpdatedAt: string;
-    CreatedAt: string;
-    ClosingDate: null | string;
+  ConversationID: number;
+  Active: boolean;
+  User: {
+    username: string;
+    userID: string;
+  }
+  Meta: {
+    GuildName: string;
+    CategoryName: string;
+    CategoryID: string;
+    ChannelName: string;
+    ChannelID: string;
+  }
+  LastUpdatedAt: string;
+  CreatedAt: string;
+  ClosingDate: null | string;
 };
 
 type ConversationMessage = {
-    MessageID: number;
-    Author: {
-        Mod: boolean;
-        Name: string;
-        ID: string;
-    }
-    Message: {
-        Internal: boolean;
-        Content: string;
-        Deleted: boolean;
-    };
-    attachment: string | null;
-    CreatedAt: string;
+  MessageID: number;
+  Author: {
+    Mod: boolean;
+    Name: string;
+    ID: string;
+  }
+  Message: {
+    Internal: boolean;
+    Content: string;
+    Deleted: boolean;
+  };
+  attachment: string | null;
+  CreatedAt: string;
 }
 
 // Permission calls
 
 type ModmailPermission = {
-    Error: ModmailError | boolean,
-    Meta: ModmailPermissionMeta,
-    Roles: ModmailPermissionRole[]
+  Error: ModmailError | boolean,
+  Meta: ModmailPermissionMeta,
+  Roles: ModmailPermissionRole[]
 }
 
 type ModmailPermissionMeta = {
-    Guild: string,
-    CategoryName: string,
-    CategoryID: string,
-    EmoteID: string,
+  Guild: string,
+  CategoryName: string,
+  CategoryID: string,
+  EmoteID: string,
 }
 
 type ModmailPermissionRole = {
-    Role: {
-        Name: string,
-        ID: string,
-    },
-    Active: boolean,
-    UpdatedAt: string,
-    CreatedAt: string,
+  Role: {
+    Name: string,
+    ID: string,
+  },
+  Active: boolean,
+  UpdatedAt: string,
+  CreatedAt: string,
 }
 
 // Global usage in Modmail.
 
 type ModmailError = {
-    status: number,
-    message: string,
+  status: number,
+  message: string,
 }

@@ -74,8 +74,7 @@ export default class RuleManagerService {
   }
 
   sendChannelMessage = (channelID, message) => {
-    const channel = global.DiscordBot.channels.cache.get(channelID) as discordjs.TextChannel;
-    channel.send(message);
+    (global.DiscordBot.channels.cache.get(channelID) as discordjs.TextChannel).send(message);
   }
 
   getServerChannelData = () => global.DiscordBot.guilds.cache
