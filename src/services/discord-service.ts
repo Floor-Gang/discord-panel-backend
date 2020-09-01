@@ -11,6 +11,10 @@ export default class DiscordService {
     this.config = config;
   }
 
+  /**
+   * Authorizie with token returned from authorizing with Oauth
+   * @param code token put in URL as query string
+   */
   initAuthorize = async (code: string): Promise<any> => axios({
     method: 'POST',
     headers: {
@@ -29,14 +33,23 @@ export default class DiscordService {
     .then((response) => response.data)
     .catch((err) => err.response);
 
+  /**
+   * Re-authorize with token returned from api/v6/oauth2/token
+   * @param accessKey Discord token to authorize
+   */
   getCurrentUser = async (accessKey: string) => this.createDiscordRequest(accessKey, '/users/@me')
     .then((data) => ({
       error: !data?.username,
       user: data,
     }))
 
-  authenticateCurrentUser = async (Key: string, checkRoles: string[]): Promise<boolean> => this
-    .getCurrentUser(Key)
+  /**
+   * Returns true/false depending on if the user has the specified discord roles or not.
+   * @param Code Discord token to authorize
+   * @param checkRoles Array with roles on which will be checked
+   */
+  authenticateCurrentUser = async (Code: string, checkRoles: string[]): Promise<boolean> => this
+    .getCurrentUser(Code)
     .then(async (data) => {
       if (data.error) {
         return false;
@@ -47,6 +60,10 @@ export default class DiscordService {
         .catch(() => false);
     })
 
+  /**
+   * Get all relevent user data
+   * @param Code Discord token to authorize
+   */
   getParsedInfo = async (code: string): Promise<any> => {
     const userData = await this.getCurrentUser(code);
 
@@ -97,6 +114,10 @@ export default class DiscordService {
     };
   }
 
+  /**
+   * Get all discord roles from specified Member
+   * @param memberID Discord member ID
+   */
   getGuildRoles = async (memberID: string): Promise<MemberRole[]> => this
     .getMember(memberID).roles.cache
     .sort((a: Role, b: Role) => a.position - b.position || Number(a.id) - Number(b.id))
@@ -106,10 +127,19 @@ export default class DiscordService {
       Color: role.hexColor,
     })).reverse();
 
+  /**
+   * Get discord member by ID
+   * @param memberID Discord member ID
+   */
   getMember = (memberID): GuildMember => global.DiscordBot.guilds.cache
     .get(this.config.DiscordGuildID)
     .members.cache.get(memberID)
 
+  /**
+   * Create default api/v6 discord GET request
+   * @param accessKey is discord oAuth token
+   * @param path Specify the path to get certain data.
+   */
   createDiscordRequest = async (accessKey: string, path: string) => axios.get(`https://discord.com/api/v6${path}`, {
     headers: {
       Authorization: `Bearer ${accessKey}`,

@@ -7,8 +7,5 @@ export default class ConfigService<T> {
    * Load config from a filepath.
    * @param path to file where config json file is specified.
    */
-  loadConfigFromPath = (path: string): T => {
-    const buffer = fs.readFileSync(path);
-    return JSON.parse(buffer.toString()) as T;
-  }
+  loadConfigFromPath = (path: string): T => JSON.parse(fs.readFileSync(path).toString()) as T
 }
