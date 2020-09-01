@@ -32,13 +32,19 @@ export default class ModmailService {
     .where({ 'conversations.conversation_id': conversationID.toString() })
     .select('*')
     .then((columns): FullConversation => ({
+      Error: false,
       Conversation: this.modmailHelper.formatConversation(columns[0]),
       Messages: columns
-        .map((column) => this.modmailHelper.formatConversationMessage(column, reqUrl)),
+        .map((column): ConversationMessage => this.modmailHelper
+          .formatConversationMessage(column, reqUrl)),
     }))
-    .catch(() => ({
-      status: 404,
-      message: 'Conversation not found',
+    .catch((): FullConversation => ({
+      Error: {
+        status: 400,
+        message: 'Conversation not found',
+      },
+      Conversation: {} as Conversation,
+      Messages: [],
     }))
 
   getAttachment = async (messageID: string): Promise<any> => this.knex('modmail.all_messages_attachments')
@@ -46,19 +52,29 @@ export default class ModmailService {
     .select('*')
     .then((columns) => columns[0].attachment)
     .catch(() => ({
-      error: 404,
+      error: 400,
       message: 'File not found.',
     }))
 
-  getCategoryPermissions = async (categoryID: bigint): Promise<any> => this.knex('modmail.categories')
+  getCategoryPermissions = async (categoryID: bigint): Promise<ModmailPermission> => this.knex('modmail.categories')
     .join('modmail.permissions', 'categories.category_id', '=', 'permissions.category_id')
     .where({
       'permissions.active': true,
       'categories.category_id': categoryID.toString(),
     })
     .select('*')
-    .on('query-response', (response: Promise<any>) => response)
-    .catch((err: Error) => ({
-      error: err,
+    .then((columns): ModmailPermission => ({
+      Error: false,
+      Meta: this.modmailHelper.formatPermissionMeta(columns[0]),
+      Roles: columns
+        .map((data): ModmailPermissionRole => this.modmailHelper.formatPermissionRole(data)),
+    }))
+    .catch(() => ({
+      Error: {
+        error: 400,
+        message: 'Category not found.',
+      },
+      Meta: {} as ModmailPermissionMeta,
+      Roles: [],
     }))
 }

@@ -1,4 +1,5 @@
 type FullConversation = {
+    Error: ModmailError | boolean,
     Conversation: Conversation,
     Messages: ConversationMessage[]
 };
@@ -37,6 +38,33 @@ type ConversationMessage = {
     attachment: string | null;
     CreatedAt: string;
 }
+
+// Permission calls
+
+type ModmailPermission = {
+    Error: ModmailError | boolean,
+    Meta: ModmailPermissionMeta,
+    Roles: ModmailPermissionRole[]
+}
+
+type ModmailPermissionMeta = {
+    Guild: string,
+    CategoryName: string,
+    CategoryID: string,
+    EmoteID: string,
+}
+
+type ModmailPermissionRole = {
+    Role: {
+        Name: string,
+        ID: string,
+    },
+    Active: boolean,
+    UpdatedAt: string,
+    CreatedAt: string,
+}
+
+// Global usage in Modmail.
 
 type ModmailError = {
     status: number,
