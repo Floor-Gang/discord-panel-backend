@@ -51,6 +51,7 @@ export default class AuthController implements IController {
 
     // Initial authentication
     router.get('/init-discord', this.getInitAuthDiscordAsync);
+
     // Re-authorize existing token.
     router.get('/discord', this.getAuthDiscordAsync);
 

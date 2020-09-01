@@ -49,4 +49,26 @@ export default class ModmailHelper {
     attachment: message.attachment === null ? null : `${reqUrl}/modmail/attachment/${message.message_id}`,
     CreatedAt: message.created_at,
   })
+
+  formatPermissionMeta = (column): ModmailPermissionMeta => {
+    const category = this.discordBot.channels.cache
+      .find((cat) => cat.id === column.category_id) as CategoryChannel;
+
+    return {
+      Guild: category ? category.guild.name : 'no_permission',
+      CategoryName: category ? category.name : 'no_permission',
+      CategoryID: category ? category.id : 'no_permission',
+      EmoteID: column.emote_id,
+    };
+  }
+
+  formatPermissionRole = (data): ModmailPermissionRole => ({
+    Role: {
+      Name: data.role_name,
+      ID: data.role_id,
+    },
+    Active: data.active,
+    UpdatedAt: data.last_update_at,
+    CreatedAt: data.created_at,
+  })
 }

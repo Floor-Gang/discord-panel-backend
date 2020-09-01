@@ -32,11 +32,7 @@ export default class RuleManagerController implements IController {
     return res.json(response);
   }
 
-  // Get the channels that you can pick from :)
-  getChannels = async (req, res) => {
-    const data = await this.ruleManagerService.getServerChannelData();
-    return res.json(data);
-  }
+  getChannels = async (req, res) => res.json(await this.ruleManagerService.getServerChannelData())
 
   getRouter = (): Router => {
     const router = Router();
@@ -44,13 +40,13 @@ export default class RuleManagerController implements IController {
     // Authenticate
     global.middlewareRoles(this.Config.Permissions.ruleManager);
 
-    // Nothing to do with auth just uhm
+    // Get current rules.
     router.get('/get', this.getRuleSettings);
 
-    // Posting the rules.
+    // Update rules.
     router.post('/set', this.setRuleSettings);
 
-    // Get the channels that you can post them in
+    // Get the channels from the defined category in the config.Rules.categoryID
     router.get('/channels', this.getChannels);
 
     return router;
