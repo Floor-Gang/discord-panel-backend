@@ -7,10 +7,16 @@ declare global {
     interface Global {
       DiscordBot: Client;
       ErrorLogGlobal: (title: string, tagUser: string, error: discordError) => Promise<boolean>,
-      authenticateUser: (accessKey: string, checkRoles: string[]) => any;
-      getUserInfo: (code: string) => any;
+      authenticateUser: (accessKey: string, checkRoles: string[]) => Promise<boolean>;
+      getUserInfo: (code: string) => Promise<ParsedUserInfo>;
       middlewareRoles: (checkRoles: string[]) => any;
       getDiscordUser: (userID: string) => GuildMember;
+    }
+  }
+
+  namespace Express {
+    interface Request {
+      user: Member
     }
   }
 }

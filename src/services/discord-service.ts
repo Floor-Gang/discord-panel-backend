@@ -12,7 +12,7 @@ export default class DiscordService {
   }
 
   /**
-   * Authorizie with token returned from authorizing with Oauth
+   * Authorize with token returned from authorizing with Oauth
    * @param code token put in URL as query string
    */
   initAuthorize = async (code: string): Promise<any> => axios({
@@ -37,7 +37,7 @@ export default class DiscordService {
    * Re-authorize with token returned from api/v6/oauth2/token
    * @param accessKey Discord token to authorize
    */
-  getCurrentUser = async (accessKey: string) => this.createDiscordRequest(accessKey, '/users/@me')
+  getCurrentUser = async (accessKey: string): Promise<currentUser> => this.createDiscordRequest(accessKey, '/users/@me')
     .then((data) => ({
       error: !data?.username,
       user: data,
@@ -64,7 +64,7 @@ export default class DiscordService {
    * Get all relevent user data
    * @param Code Discord token to authorize
    */
-  getParsedInfo = async (code: string): Promise<any> => {
+  getParsedInfo = async (code: string): Promise<ParsedUserInfo> => {
     const userData = await this.getCurrentUser(code);
 
     if (userData.error) {
@@ -74,7 +74,7 @@ export default class DiscordService {
           error: true,
           message: 'Error while authenticating user.',
         },
-        user: {},
+        user: {} as Member,
       };
     }
 
@@ -93,7 +93,7 @@ export default class DiscordService {
           error: true,
           message: 'You don\'t have the required roles',
         },
-        user: {},
+        user: {} as Member,
       };
     }
 

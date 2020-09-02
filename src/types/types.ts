@@ -18,22 +18,6 @@ type Config = {
   }
 }
 
-type Member = {
-  AccessToken: string;
-  ID: string;
-  Email: string;
-  AvatarHash: string,
-  ProfileURL: string,
-  Username: string,
-  Roles: MemberRole[]
-}
-
-type MemberRole = {
-  ID: string;
-  Name: string;
-  Color: string;
-}
-
 type postRules = {
   rules: object[];
   channel: string;

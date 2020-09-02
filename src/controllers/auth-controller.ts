@@ -14,7 +14,7 @@ export default class AuthController implements IController {
   getInitAuthDiscordAsync = async (req, res) => {
     const response = await this.discordService.initAuthorize(req.query.code);
 
-    if (response.error != null) {
+    if (response?.error) {
       res.status(401);
       return res.json(response);
     }
